@@ -1,0 +1,37 @@
+name: Deploy
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+  actions: read # to look up the Security run for this commit
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Wait for this commit's security scan
+        env:
+          GH_TOKEN: ${{ github.token }}
+          SHA: ${{ github.sha }}
+        run: |
+          for attempt in $(seq 1 60); do
+            run=$(gh api "repos/$GITHUB_REPOSITORY/actions/workflows/security.yml/runs?head_sha=$SHA&event=push&per_page=1" \
+                  --jq '.workflow_runs[0] // {}')
+            status=$(jq -r '.status // "missing"' <<<"$run")
+            conclusion=$(jq -r '.conclusion // "none"' <<<"$run")
+            [ "$status" = "completed" ] && break
+            sleep 20
+          done
+          [ "$status" = "completed" ] || { echo "::error::No completed security scan for $SHA"; exit 1; }
+
+          # The obvious check, and the bug: list the bad outcomes, let the rest through
+          case "$conclusion" in
+            failure|timed_out) echo "::error::Security scan finished as $conclusion"; exit 1 ;;
+          esac
+          echo "Security scan did not fail. Deploying."
+
+      - name: Deploy
+        run: echo "Deploying $GITHUB_SHA" # your real deploy goes here

@@ -1,0 +1,8 @@
+# Deliberate training vulnerabilities. Accepted, stand-in run.
+CVE-2015-9235 exp:2027-01-18
+CVE-2019-10744 exp:2027-01-18
+CVE-2023-46233 exp:2027-01-18
+CVE-2026-106445 exp:2027-01-18
+CVE-2026-106446 exp:2027-01-18
+CVE-2026-59873 exp:2027-01-18
+CVE-2026-71851 exp:2027-01-18

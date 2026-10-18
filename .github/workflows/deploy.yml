@@ -12,7 +12,7 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-      - name: Wait for this commit's security scan
+      - name: Require a passing security scan for this commit
         env:
           GH_TOKEN: ${{ github.token }}
           SHA: ${{ github.sha }}
@@ -22,16 +22,19 @@ jobs:
                   --jq '.workflow_runs[0] // {}')
             status=$(jq -r '.status // "missing"' <<<"$run")
             conclusion=$(jq -r '.conclusion // "none"' <<<"$run")
-            [ "$status" = "completed" ] && break
+            if [ "$status" = "completed" ]; then
+              if [ "$conclusion" = "success" ]; then
+                echo "Security scan passed for $SHA."
+                exit 0
+              fi
+              echo "::error::Security scan for $SHA finished as '$conclusion'. Only 'success' deploys."
+              exit 1
+            fi
+            echo "Security scan is '$status', waiting ($attempt/60)"
             sleep 20
           done
-          [ "$status" = "completed" ] || { echo "::error::No completed security scan for $SHA"; exit 1; }
-
-          # The obvious check, and the bug: list the bad outcomes, let the rest through
-          case "$conclusion" in
-            failure|timed_out) echo "::error::Security scan finished as $conclusion"; exit 1 ;;
-          esac
-          echo "Security scan did not fail. Deploying."
+          echo "::error::No completed security scan for $SHA after 20 minutes."
+          exit 1
 
       - name: Deploy
         run: echo "Deploying $GITHUB_SHA" # your real deploy goes here

@@ -1,0 +1,24 @@
+# Deliberate training vulnerabilities. Accepted as a batch, stand-in run.
+test/
+data/static/codefixes/dbSchemaChallenge_1.ts
+data/static/codefixes/dbSchemaChallenge_3.ts
+data/static/codefixes/unionSqlInjectionChallenge_1.ts
+data/static/codefixes/unionSqlInjectionChallenge_3.ts
+frontend/src/app/login/login.component.ts
+routes/address.ts
+routes/basket.ts
+routes/basketItems.ts
+routes/captcha.ts
+routes/dataErasure.ts
+routes/delivery.ts
+routes/deluxe.ts
+routes/likeProductReviews.ts
+routes/login.ts
+routes/order.ts
+routes/payment.ts
+routes/search.ts
+routes/showProductReviews.ts
+routes/trackOrder.ts
+routes/userProfile.ts
+routes/verify.ts
+routes/wallet.ts
